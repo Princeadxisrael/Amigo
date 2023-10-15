@@ -12,6 +12,15 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+//declaring  map as a global variable
+let map;
+let mapEvent;
+inputCadence.value =
+  inputDistance.value =
+  inputDuration.value =
+  inputElevation.value =
+    '';
+
 if (navigator.geolocation)
   navigator.geolocation.getCurrentPosition(
     function (position) {
@@ -19,28 +28,18 @@ if (navigator.geolocation)
       console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
       const coords = [latitude, longitude];
 
-      const map = L.map('map').setView([`${latitude}`, `${longitude}`], 13);
+      map = L.map('map').setView(coords, 13);
 
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      map.on('click', function (mapEvent) {
-        const { lat, lng } = mapEvent.latlng;
-        L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup(
-            L.popup({
-              maxWidth: 250,
-              minWidth: 100,
-              autoClose: false,
-              closeOnClick: false,
-              className: 'running-popup',
-            })
-          )
-          .setPopupContent('Workout')
-          .openPopup();
+      //add an event listener to the map
+      map.on('click', function (mapE) {
+        mapEvent = mapE;
+        form.classList.remove('hidden');
+        inputDistance.focus();
       });
     },
 
@@ -48,3 +47,33 @@ if (navigator.geolocation)
       alert('Could not fetch location');
     }
   );
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const { lat, lng } = mapEvent.latlng;
+  console.log(mapEvent);
+  L.marker([lat, lng])
+    .addTo(map)
+    .bindPopup(
+      L.popup({
+        maxWidth: 250,
+        minWidth: 100,
+        autoClose: false,
+        closeOnClick: false,
+        className: 'running-popup',
+      })
+    )
+    .setPopupContent(
+      `Your current location:  ${(lat, lng)}
+    you have ran ${inputDistance.value} km
+    you have a cadence score of ${inputCadence.value}
+    
+    `
+    )
+    .openPopup();
+});
+
+inputType.addEventListener('change', function () {
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+});
