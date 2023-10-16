@@ -12,13 +12,49 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-//declaring  map as a global variable
+
+class workOuts {
+  date = new Date();
+  id = (Date.now() + '').slice(-10);
+
+  constructor(distance, duration, coords) {
+    this.distance = distance;
+    this.duration = duration;
+    this.coords = coords;
+  }
+}
+
+class cyling extends workOuts {
+  constructor(distance, duration, coords, elevationGain) {
+    super(distance, duration, coords);
+
+    this.elevationGain = elevationGain;
+    this.calcSpeed;
+  }
+  calcSpeed() {
+    this.speed = this.distance / (this.duration / 60);
+  }
+}
+
+class running extends workOuts {
+  constructor(distance, duration, coords, cadence) {
+    super(distance, duration, coords);
+
+    this.cadence = cadence;
+    this.calcPace();
+  }
+  calcPace() {
+    this.pace = this.duration / this.distance;
+  }
+}
 
 class App {
+  //declaring  map and mapEvent as private property
   #map;
   #mapEvent;
   constructor() {
     this._getPosition();
+    //these eventlisteners are avaliable as soon as the script is loaded
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
   }
@@ -90,4 +126,4 @@ class App {
   }
 }
 
-const app = new App();
+const app = new App(); //instantiating an initial application
