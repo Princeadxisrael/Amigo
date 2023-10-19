@@ -34,7 +34,7 @@ class Cyling extends WorkOuts {
     super(distance, duration, coords);
 
     this.elevationGain = elevationGain;
-    this.calcSpeed;
+    this.calcSpeed();
     this._setDescription();
   }
   calcSpeed() {
@@ -138,6 +138,7 @@ class App {
         !notString(distance, duration, elevationGain)
       )
         return alert('Inpts must be positive numbers');
+      workout = new Cyling(distance, duration, [lat, lng], elevationGain);
     }
 
     //add new objects to workout array
