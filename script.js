@@ -25,6 +25,7 @@ class workOuts {
 }
 
 class cyling extends workOuts {
+  type = 'cycling';
   constructor(distance, duration, coords, elevationGain) {
     super(distance, duration, coords);
 
@@ -37,6 +38,7 @@ class cyling extends workOuts {
 }
 
 class running extends workOuts {
+  type = 'running';
   constructor(distance, duration, coords, cadence) {
     super(distance, duration, coords);
 
@@ -94,14 +96,39 @@ class App {
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
   }
   _newWorkout(e) {
-    console.log(inputDistance.value);
-    console.log(inputCadence.value);
+    const allPositive = (...inputs) => inputs.every(inp => inp > 0);
+    const notString = (...inputs) => inputs.every(inp => Number.isFinite(inp));
     e.preventDefault();
-    inputCadence.value =
-      inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
+
+    //get data from form
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+
+    //if runniing workout, create running object
+    if (type === 'running') {
+      const cadence = +inputCadence.value;
+      //check if data is valid
+      if (
+        !allPositive(distance, duration, cadence) ||
+        !notString(distance, duration, cadence)
+      )
+        return alert('Inpts must be positive numbers');
+    }
+    //if cycling workout, create cycling object
+    if (type === 'cycling') {
+      const elevationGain = +inputElevation.value;
+      //check if data is valid
+      if (
+        !allPositive(distance, duration) ||
+        !notString(distance, duration, elevationGain)
+      )
+        return alert('Inpts must be positive numbers');
+    }
+
+    //add new objects to workout array
+
+    //render workout on map as marker
     const { lat, lng } = this.#mapEvent.latlng;
     console.log(this.#mapEvent);
     L.marker([lat, lng])
@@ -112,17 +139,22 @@ class App {
           minWidth: 100,
           autoClose: false,
           closeOnClick: false,
-          className: 'running-popup',
+          className: `${type}-popup`,
         })
       )
       .setPopupContent(
         `Your current location:  ${(lat, lng)}
-    you have ran ${inputDistance.value} km
-    you have a cadence score of ${inputCadence.value}
+    you have ran ${distance} km and for ${duration} mins
     
     `
       )
       .openPopup();
+    //hide form and clear input values
+    inputCadence.value =
+      inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+        '';
   }
 }
 
