@@ -59,6 +59,7 @@ class Running extends WorkOuts {
 class App {
   //declaring  map and mapEvent as private property
   #map;
+  #mapZoomLevel = 13;
   #mapEvent;
   #workout = [];
 
@@ -67,6 +68,7 @@ class App {
     //these eventlisteners are avaliable as soon as the script is loaded
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
   _getPosition() {
     if (navigator.geolocation)
@@ -83,7 +85,7 @@ class App {
     console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
@@ -231,6 +233,19 @@ class App {
 </li>
     `;
     form.insertAdjacentHTML('afterend', html);
+  }
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+    if (!workoutEl) return; //guard clause
+    const workout = this.#workout.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
   }
 }
 
