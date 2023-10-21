@@ -13,6 +13,8 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class WorkOuts {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+  //creating a public interface
+  clicks = 0;
 
   constructor(distance, duration, coords) {
     this.distance = distance;
@@ -25,6 +27,10 @@ class WorkOuts {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
+  }
+  //incrementing the click
+  click() {
+    this.clicks++;
   }
 }
 
@@ -65,6 +71,8 @@ class App {
 
   constructor() {
     this._getPosition();
+
+    this._getLocalStorage();
     //these eventlisteners are avaliable as soon as the script is loaded
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
@@ -94,6 +102,10 @@ class App {
 
     //add an event listener to the map
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workout.forEach(work => {
+      this._renderworkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -165,6 +177,7 @@ class App {
     //hide form
     this._hideForm();
     // and clear input values
+    this._setLocalStorage();
   }
   _renderworkoutMarker(workout) {
     L.marker(workout.coords)
@@ -246,6 +259,23 @@ class App {
         duration: 1,
       },
     });
+    // workout.click(); //using the public interface
+  }
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workout));
+  }
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+    this.#workout = data;
+    this.#workout.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
